@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using WkHtmlToPdfDotNet;
+using WkHtmlToPdfDotNet.Contracts;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +33,8 @@ builder.Services.AddDbContext<MabrukInventarioContext>(
     options => options.UseSqlServer("name=MabrukInventario", o => o.UseCompatibilityLevel(110)));
 
 builder.Services.AddAutoMapper(typeof(Program));
+
+builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

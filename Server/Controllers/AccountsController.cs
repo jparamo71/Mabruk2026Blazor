@@ -71,9 +71,9 @@ namespace MabrukBlazor2026.Server.Controllers
                 {
                     UserName = userInfoAccount.FullName,
                     Email = userInfoAccount.Email,
-                    UserId = userInfoAccount.UserId
+                    UserId = userInfoAccount.UserId.ToString()
                 };
-                UserTokenDto token = BuildToken(UserInfoDto userInfo, List<string> roles);
+                UserTokenDto token = BuildToken(infoUser, new List<string>());
 
                 return Ok(userInfoAccount);
             }

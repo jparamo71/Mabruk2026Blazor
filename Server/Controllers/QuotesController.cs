@@ -5,6 +5,8 @@ using MabrukBlazor2026.Shared.ModelsInventario;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Reporting.Map.WebForms.BingMaps;
+using WkHtmlToPdfDotNet;
+using WkHtmlToPdfDotNet.Contracts;
 
 namespace MabrukBlazor2026.Server.Controllers
 {
@@ -15,15 +17,21 @@ namespace MabrukBlazor2026.Server.Controllers
         private readonly MabrukInventarioContext context;
         private readonly MabrukContext contextMabruk;
         private readonly IMapper mapper;
+        private readonly IConverter converter;
+        private readonly IWebHostEnvironment env;
 
         public QuotesController(
             MabrukInventarioContext context,
             MabrukContext contextMabruk,
-            IMapper mapper)
+            IMapper mapper,
+            IConverter converter, 
+            IWebHostEnvironment env)
         {
             this.context = context;
             this.contextMabruk = contextMabruk;
             this.mapper = mapper;
+            this.converter = converter;
+            this.env = env;
         }
 
 
@@ -206,10 +214,25 @@ namespace MabrukBlazor2026.Server.Controllers
         }
 
 
-        public async Task<bool> GeneratePDF()
+        [HttpPost("generate-pdf/{id}")]
+        public async Task<ActionResult<string>> GeneratePDF(int id)
         {
-            
-            string html = $@"
+
+            // Getting Quote information from database
+            Pedido? pedido = await context.Pedido.FirstOrDefaultAsync(x =>x.PedidoId == id);
+            if (pedido == null)
+            {
+                return NotFound();
+            }
+
+            Cliente? cliente = await contextMabruk.Cliente.FirstOrDefaultAsync(y => y.ClienteId == pedido.ClienteId);
+            if (cliente == null)
+            {
+                return NotFound();
+            }
+
+
+            string htmlContenido = $@"
     <html>
     <head>
         <style>
@@ -229,21 +252,22 @@ namespace MabrukBlazor2026.Server.Controllers
         <table class='header-table'>
             <tr>
                 <td>
-                    <img src='{rutaLogo}' class='logo' />
+                    <img src='logo.png' class='logo' />
                     <div class='titulo'>COTIZACIÓN</div>
                 </td>
                 <td class='empresa-info'>
-                    <strong>Mi Empresa S.A.</strong><br/>
+                    <strong>Mabruk S.A.</strong><br/>
                     Nit: 123456-7<br/>
-                    contacto@miempresa.com
+                    info@mabrukgt.com
                 </td>
             </tr>
         </table>
 
         <!-- Datos del Cliente -->
         <div style='margin-bottom: 20px;'>
-            <strong>Preparado para:</strong><br/>
-            {cliente}<br/>
+            <strong>Atención a:</strong><br/>
+            NIT: {cliente.Nit}<br />
+            Nombre: {cliente.NombreComercial}<br/>
             Fecha: {DateTime.Now:dd/MM/yyyy}
         </div>
 
@@ -257,26 +281,69 @@ namespace MabrukBlazor2026.Server.Controllers
                     <th style='text-align: right;'>Total</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody>";
+
+            string body = "";
+            foreach (var item in pedido.DetallePedido)
+            {
+                Producto? producto = await contextMabruk.Producto.FirstOrDefaultAsync(x => x.ProductoId == item.ProductoId);
+                if (producto == null)
+                {
+                    return NotFound("producto");
+                }
+                body += $@"
                 <tr>
-                    <td>Desarrollo de Software a Medida</td>
-                    <td style='text-align: right;'>1</td>
-                    <td style='text-align: right;'>$1,500.00</td>
-                    <td style='text-align: right;'>$1,500.00</td>
-                </tr>
+                    <td>{producto.NombreProducto}</td>
+                    <td style='text-align: right;'>{item.Cantidad?.ToString("N2")}</td>
+                    <td style='text-align: right;'>{item.ValorUnitario?.ToString("N2")}</td>
+                    <td style='text-align: right;'>{item.ValorTotal?.ToString("N2")}</td>
+                </tr>";
+            }
+
+
+            string footer = $@"                
                 <tr class='total-row'>
                     <td colspan='3' style='text-align: right;'>Total:</td>
-                    <td style='text-align: right;'>{total}</td>
+                    <td style='text-align: right;'>{pedido.ValorTotal.ToString("N2")}</td>
                 </tr>
             </tbody>
         </table>
     </body>
     </html>";
 
+            htmlContenido += body + footer;
 
+            string nombreArchivo = "CT_Mabruk2026.pdf";
+            string carpetaDestino = Path.Combine(env.WebRootPath, "pdf");
 
+            if (!Directory.Exists(carpetaDestino))
+            {
+                Directory.CreateDirectory(carpetaDestino);
             }
 
+            string rutaCompleta = Path.Combine(carpetaDestino, nombreArchivo);
+
+            var doc = new HtmlToPdfDocument()
+            {
+                GlobalSettings = {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Portrait,
+                PaperSize = PaperKind.A4,
+                Out = rutaCompleta // Guarda el archivo directamente en el disco del servidor
+            },
+                Objects = {
+                new ObjectSettings() {
+                    PagesCount = true,
+                    HtmlContent = htmlContenido,
+                    WebSettings = { DefaultEncoding = "utf-8" }
+                }
+            }
+            };
+
+            // Ejecuta la conversión física
+            converter.Convert(doc);
+
+            return rutaCompleta;
         }
     }
 
