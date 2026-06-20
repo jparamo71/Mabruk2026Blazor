@@ -24,7 +24,7 @@ namespace MabrukBlazor2026.Server.Controllers
             MabrukInventarioContext context,
             MabrukContext contextMabruk,
             IMapper mapper,
-            IConverter converter, 
+            IConverter converter,
             IWebHostEnvironment env)
         {
             this.context = context;
@@ -98,7 +98,7 @@ namespace MabrukBlazor2026.Server.Controllers
                 if (error._value == 0)
                 {
                     return Ok(await QuoteDataService.GetQuote(context, contextMabruk, quoteId.Value ?? 0));
-                    
+
                 }
 
                 return BadRequest($"No se pudo crear la cotización. {error._value} este fue el error {error.Value} ");
@@ -122,6 +122,13 @@ namespace MabrukBlazor2026.Server.Controllers
 
                 if (error.Value == 0)
                 {
+                    // Generate PDF
+                    var fileName = await this.toGeneratePDF(id);
+                    if (string.IsNullOrEmpty(fileName))
+                    {
+                        return BadRequest("Error al generar el PDF.");
+                    }
+
                     return Ok(error.Value);
                 }
 
@@ -189,7 +196,7 @@ namespace MabrukBlazor2026.Server.Controllers
 
 
         [HttpPut("update-note")]
-        public async Task<ActionResult> UpdateNote([FromBody]UpdateNoteDto model)
+        public async Task<ActionResult> UpdateNote([FromBody] UpdateNoteDto model)
         {
             try
             {
@@ -217,28 +224,48 @@ namespace MabrukBlazor2026.Server.Controllers
         [HttpPost("generate-pdf/{id}")]
         public async Task<ActionResult<string>> GeneratePDF(int id)
         {
-
-            // Getting Quote information from database
-            Pedido? pedido = await context.Pedido.FirstOrDefaultAsync(x =>x.PedidoId == id);
-            if (pedido == null)
+            var fileName = await this.toGeneratePDF(id);
+            if (string.IsNullOrEmpty(fileName))
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            Cliente? cliente = await contextMabruk.Cliente.FirstOrDefaultAsync(y => y.ClienteId == pedido.ClienteId);
-            if (cliente == null)
+            return fileName;
+        }
+
+
+
+        private async Task<string> toGeneratePDF(int id)
+        {
+            string rutaImagen = Path.Combine("Helpers", "mabruk.png");
+            byte[] imageBytes = System.IO.File.ReadAllBytes(rutaImagen);
+            string base64String = Convert.ToBase64String(imageBytes);
+
+            try
             {
-                return NotFound();
-            }
+                // Getting Quote information from database
+                Pedido? pedido = await context.Pedido
+                    .Include(x => x.DetallePedido)
+                    .FirstOrDefaultAsync(x => x.PedidoId == id);
+                if (pedido == null)
+                {
+                    return "";
+                }
 
+                Cliente? cliente = await contextMabruk.Cliente.FirstOrDefaultAsync(y => y.ClienteId == pedido.ClienteId);
+                if (cliente == null)
+                {
+                    return "";
+                }
+                string tipoDocumento = pedido.EsCotizacion ? "COTIZACIÓN" : "PEDIDO";
 
-            string htmlContenido = $@"
+                string htmlContenido = $@"
     <html>
     <head>
         <style>
             body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 30px; }}
             .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 30px; }}
-            .logo {{ width: 120px; }}
+            .logo {{ width: 120px; height:auto; }}
             .empresa-info {{ text-align: right; font-size: 12px; color: #666; }}
             .titulo {{ font-size: 24px; color: #2C3E50; font-weight: bold; }}
             .detalles-table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
@@ -252,8 +279,8 @@ namespace MabrukBlazor2026.Server.Controllers
         <table class='header-table'>
             <tr>
                 <td>
-                    <img src='logo.png' class='logo' />
-                    <div class='titulo'>COTIZACIÓN</div>
+                    <img src='data:image/png;base64,{base64String}' class='logo' />
+                    <div class='titulo'>{tipoDocumento}</div>
                 </td>
                 <td class='empresa-info'>
                     <strong>Mabruk S.A.</strong><br/>
@@ -283,25 +310,24 @@ namespace MabrukBlazor2026.Server.Controllers
             </thead>
             <tbody>";
 
-            string body = "";
-            foreach (var item in pedido.DetallePedido)
-            {
-                Producto? producto = await contextMabruk.Producto.FirstOrDefaultAsync(x => x.ProductoId == item.ProductoId);
-                if (producto == null)
+                string body = "";
+                foreach (var item in pedido.DetallePedido)
                 {
-                    return NotFound("producto");
-                }
-                body += $@"
+                    Producto? producto = await contextMabruk.Producto.FirstOrDefaultAsync(x => x.ProductoId == item.ProductoId);
+                    if (producto == null)
+                    {
+                        return "";
+                    }
+                    body += $@"
                 <tr>
                     <td>{producto.NombreProducto}</td>
                     <td style='text-align: right;'>{item.Cantidad?.ToString("N2")}</td>
                     <td style='text-align: right;'>{item.ValorUnitario?.ToString("N2")}</td>
                     <td style='text-align: right;'>{item.ValorTotal?.ToString("N2")}</td>
                 </tr>";
-            }
+                }
 
-
-            string footer = $@"                
+                string footer = $@"                
                 <tr class='total-row'>
                     <td colspan='3' style='text-align: right;'>Total:</td>
                     <td style='text-align: right;'>{pedido.ValorTotal.ToString("N2")}</td>
@@ -311,45 +337,56 @@ namespace MabrukBlazor2026.Server.Controllers
     </body>
     </html>";
 
-            htmlContenido += body + footer;
+                htmlContenido += body + footer;
 
-            string nombreArchivo = "CT_Mabruk2026.pdf";
-            string carpetaDestino = Path.Combine(env.WebRootPath, "pdf");
+                string nombreArchivo = (pedido.EsCotizacion ? "CT_" : "PD_") + pedido.PedidoId.ToString() + "_" + pedido.Fecha.Year.ToString() + ".pdf";
+                string carpetaDestino = Path.Combine(env.WebRootPath, "pdf");
 
-            if (!Directory.Exists(carpetaDestino))
-            {
-                Directory.CreateDirectory(carpetaDestino);
-            }
-
-            string rutaCompleta = Path.Combine(carpetaDestino, nombreArchivo);
-
-            var doc = new HtmlToPdfDocument()
-            {
-                GlobalSettings = {
-                ColorMode = ColorMode.Color,
-                Orientation = Orientation.Portrait,
-                PaperSize = PaperKind.A4,
-                Out = rutaCompleta // Guarda el archivo directamente en el disco del servidor
-            },
-                Objects = {
-                new ObjectSettings() {
-                    PagesCount = true,
-                    HtmlContent = htmlContenido,
-                    WebSettings = { DefaultEncoding = "utf-8" }
+                if (!Directory.Exists(carpetaDestino))
+                {
+                    Directory.CreateDirectory(carpetaDestino);
                 }
+
+                string rutaCompleta = Path.Combine(carpetaDestino, nombreArchivo);
+
+                if (System.IO.File.Exists(rutaCompleta))
+                {
+                    System.IO.File.Delete(rutaCompleta);
+                }
+
+                var doc = new HtmlToPdfDocument()
+                {
+                    GlobalSettings = {
+                        ColorMode = ColorMode.Color,
+                        Orientation = Orientation.Portrait,
+                        PaperSize = PaperKind.A4,
+                        Out = rutaCompleta
+                    },
+                    Objects = {
+                        new ObjectSettings() {
+                            PagesCount = true,
+                            HtmlContent = htmlContenido,
+                            WebSettings = { DefaultEncoding = "utf-8" }
+                        }
+                    }
+                };
+
+                converter.Convert(doc);
+
+                return rutaCompleta;
             }
-            };
-
-            // Ejecuta la conversión física
-            converter.Convert(doc);
-
-            return rutaCompleta;
+            catch (Exception ex)
+            {
+                return "";
+            }
         }
+
     }
 
 
     /// Servicio de datos
-    public static class QuoteDataService {
+    public static class QuoteDataService
+    {
 
 
         // Retorna la data completa de una cotización,
@@ -358,7 +395,7 @@ namespace MabrukBlazor2026.Server.Controllers
         // que el id corresponde a una cotización válida.
         public static async Task<OrderRequestDto> GetQuote(
             MabrukInventarioContext context,
-            MabrukContext contextMabruk, 
+            MabrukContext contextMabruk,
             int id)
         {
             var pedidoDB = await context.Pedido
