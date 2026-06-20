@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\MabrukBlazor2026.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="DataSetProducts.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DataSetProducts.xsd</DependentUpon>
+    </Compile>
+    <Compile Update="DataSetTakeInventory.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DataSetTakeInventory.xsd</DependentUpon>
+    </Compile>
+    <Compile Update="DataSetVerificationImport.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DataSetVerificationImport.xsd</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="DataSetProducts.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>DataSetProducts.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="DataSetTakeInventory.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>DataSetTakeInventory.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="DataSetVerificationImport.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>DataSetVerificationImport.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+</Project>

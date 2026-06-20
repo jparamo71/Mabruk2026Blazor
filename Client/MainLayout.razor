@@ -1,0 +1,71 @@
+﻿@inherits LayoutComponentBase
+
+@inject NavigationManager navigationManager
+@inject ILoginService loginService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Mabruk</PageTitle>
+
+<RadzenDialog />
+
+
+<div id="spinBloqueo" class="bloqueo-modal d-none d-flex flex-column">
+    <h4 class="text-black-50">@message</h4>
+    <img src="/images/loading.gif" alt="animación" style="width: 150px;" />
+</div>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="page">
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+            <main class="d-flex flex-column main-content" style="background-color: #f4f7f9; ">
+
+                <div class="top-row px-4 " style="box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;">
+
+                    <div class="w-100 text-end">
+                        <LinksAuth />
+                    </div>
+                </div>
+
+                <article class="content p-3" style="flex-grow:1;">
+                    @Body
+                </article>
+            </main>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <Blazor.Client.Pages.Auth.Login />
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+
+
+@code {
+
+    private string logInEmail = "";
+    private string message = "";
+    private string identification = "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider
+             .GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            Console.WriteLine("Autenticado");
+        }
+        else
+        {
+            Console.WriteLine("No autenticado");
+        }
+        //logInEmail = await loginService.GetClaimByType("UserName");
+    }
+
+}

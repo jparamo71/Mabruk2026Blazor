@@ -1,0 +1,124 @@
+﻿@page "/updatecodes"
+
+@inject IRepository repository
+@inject SweetAlertService swal
+
+
+<div class="container">
+    <div class="row mb-3">
+        <div class="col">
+            <h3>Actualización de códigos</h3>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <div class="input-group">
+                <input type="text" @bind-value="textToSearch" class="form-control" @bind-value:event="oninput"
+                       @onkeypress="@((KeyboardEventArgs e) => OnKeyPressed(e))" autocomplete="off" />
+                <button type="button" class="btn btn-primary" @onclick="@(() => LoadProducts())">Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (products != null)
+{
+    <div class="container-fluid">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Código de producto</th>
+                    <th>Código UPC</th>
+                    @* <th></th> *@
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in products)
+                {
+                    <tr>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                    @onclick="@(() => UpdateBarcharCode(item))">
+                                <i class="bi bi-upc"></i>
+                            </button>
+                        </td>
+                        <td>@item.Code</td>
+                        <td>@item.Name</td>
+                        <td>@item.BarcharCode</td>
+                        <td>@item.UPCCode</td>
+                        @* <td>
+                            <button type="button" class="btn btn-sm btn-secondary"
+                                    @onclick="@(() => UpdateUPCCode(item))">
+                                <i class="bi bi-upc-scan"></i>
+                            </button>
+                        </td> *@
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+@code {
+    /*
+    * REVIEW
+    *
+    * Get user input code
+    * Special search of associated products
+    * Selection one single product
+    * Save code into product db data
+    *
+    */
+
+
+    private IEnumerable<ProductDto>? products;
+    private string? textToSearch;
+
+
+
+    async Task LoadProducts()
+    {
+        products = null;
+        var http = await repository.Get<IEnumerable<ProductDto>>($"api/product?filter={textToSearch}");
+        if (!http.Error)
+        {
+            products = http.Response!;
+        }
+    }
+
+
+    async Task UpdateBarcharCode(ProductDto item)
+    {
+        item.BarcharCode = textToSearch;
+        var http = await repository.Post<object>($"api/product/updatebarcode", item);
+        if (http.Error)
+        {
+            await swal.FireAsync("Error", await http.GetErrorMessage(), SweetAlertIcon.Error);
+        }
+        else
+        {
+            await swal.FireAsync("Info", "Se actualizó el código de barras del producto.", SweetAlertIcon.Info);
+            products = null;
+            textToSearch = string.Empty;
+        }
+    }
+
+
+
+   
+
+
+    async Task OnKeyPressed(KeyboardEventArgs eventArgs)
+    {
+        Console.WriteLine(eventArgs.Key);
+        if (eventArgs.Key == "Enter")
+        {
+            await LoadProducts();
+        }
+    }
+
+}

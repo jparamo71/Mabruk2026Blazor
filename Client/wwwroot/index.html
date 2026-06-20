@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Blazor</title>
+    <base href="/" />
+    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="lib/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link href="Blazor.Client.styles.css" rel="stylesheet" />
+    <link href="_content/Radzen.Blazor/css/standard-base.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">Loading...</div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="_content/CurrieTechnologies.Razor.SweetAlert2/sweetAlert2.min.js"></script>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+    <script>
+
+        window.getCulture = function () {
+
+            var msg = (navigator.languages && navigator.languages.length) ? navigator.languages[0] :
+                navigator.userLanguage || navigator.language || navigator.browserLanguage || 'en';
+
+            return msg;
+        }
+
+
+        window.blazorCulture = {
+            get: () => localStorage["BlazorCulture"],
+            set: (value) => localStorage["BlazorCulture"] = value
+        }
+
+        function configPopover() {
+            var disposeList = document.querySelectorAll('[data-bs-toggle="popover"]')
+            for (var popoverEl of disposeList) {
+                var clean = new bootstrap.Popover(popoverEl);
+                clean.dispose();
+            }
+
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+        }
+
+        window.SubmitHTML = async (fileName, contentStreamReference) => {
+            const arrayBuffer = await contentStreamReference.arrayBuffer();
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const anchorElement = document.createElement("a");
+            anchorElement.href = url;
+            anchorElement.download = fileName ?? "";
+            anchorElement.click();
+            anchorElement.remove();
+            URL.revokeObjectURL(url);
+        };
+
+
+        function timerInactivo(dotnetHelper)
+        {
+            var timer;
+            document.onmousemove = resetTimer;
+            document.onkeypress = resetTimer;
+
+            function resetTimer() {
+                clearTimeout(timer);
+                timer = setTimeout(logout, 3*1000)
+            }
+
+            function logout() {
+                dotnetHelper.invokeMethodAsync("logout");
+            }
+        }
+
+
+    </script>
+
+</body>
+
+</html>

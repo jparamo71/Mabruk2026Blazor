@@ -1,0 +1,85 @@
+﻿@inject NavigationManager navigationManager
+
+
+<div class="top-row navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand mx-auto" href="">
+            <img src="images/mabruk.png" height="30" alt="logo" class="object-fit-contain" />
+        </a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column px-4">
+        <div class="nav-item">
+            <a class="nav-link " href="updatecodes"
+               @ref="htmlMenu8">
+                <i class="bi bi-qr-code-scan fs-4"></i>
+                <span class="nav-link-text ps-2" aria-hidden="true">Códigos</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a class="nav-link " href="update-code-boxes"
+               @ref="htmlMenu8">
+                <i class="bi bi-upc-scan fs-4"></i>
+                <span class="nav-link-text ps-2" aria-hidden="true">Códigos UPC</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a class="nav-link " href="inventorylist"
+               @ref="htmlButton">
+                <i class="bi bi-repeat fs-4"></i>
+                <span class="nav-link-text ps-2">Toma física</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a class="nav-link " href="imports"
+               @ref="htmlMenu2">
+                <i class="bi bi-boxes fs-4"></i>
+                <span class="nav-link-text ps-2" aria-hidden="true">Importaciones</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a class="nav-link " href="products"
+               @ref="htmlMenu3">
+                <i class="bi bi-collection fs-4"></i>
+                <span class="nav-link-text ps-2" aria-hidden="true">Productos</span>
+            </a>
+        </div>
+    </nav>
+</div>
+
+@code {
+
+
+    private bool collapseNavMenu = true;
+
+    ElementReference htmlButton;
+    ElementReference htmlMenu2;
+    ElementReference htmlMenu3;
+    ElementReference htmlMenu4;
+    ElementReference htmlMenu5;
+    ElementReference htmlMenu6;
+    ElementReference htmlMenu7;
+    ElementReference htmlMenu8;
+    ElementReference htmlMenu9;
+    ElementReference htmlMenu10;
+    ElementReference htmlMenu11;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    // void ShowTooltip(ElementReference elementReference, string message, TooltipOptions options = null)
+    // {
+    //     options = new TooltipOptions();
+    //     options.Position = TooltipPosition.Right;
+    //     tooltipService.Open(elementReference, message, options);
+    // }
+
+}

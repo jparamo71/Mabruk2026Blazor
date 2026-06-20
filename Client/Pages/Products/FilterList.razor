@@ -1,0 +1,39 @@
+﻿@inject DialogService dialogService
+
+
+@if (Marks != null && Filters != null)
+{
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Buscar productos" aria-label="Buscar producto" aria-describedby="basic-addon2"
+               @bind-value="Filters.TextToSearch" @bind-value:event="oninput" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold small">Marca</label>
+        <select class="form-select" @bind="@Filters.SelectedMarkId">
+            <option value="0">SELECCIONE</option>
+            @foreach (var item in Marks)
+            {
+                <option value="@item.Id">@item.Name</option>
+            }
+        </select>
+    </div>
+    <div class="mb-3">
+        <button type="button" class="btn btn-dark" @onclick="ApplyFilters">Buscar</button>
+    </div>
+}
+@code {
+
+    [Parameter]
+    public List<MarkDto>? Marks { get; set; }
+
+
+    [Parameter]
+    public ProductsFilterDto? Filters { get; set; }
+
+    
+    void ApplyFilters()
+    {
+        dialogService.CloseSide(Filters);
+    }
+
+}

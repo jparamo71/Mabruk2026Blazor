@@ -1,0 +1,33 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <div class="row justify-content-end">
+            <div class="col-auto align-self-end ">
+                <div class="btn-group d-inline me-2 dropdown-center">
+                    <button type="button" class="btn btn-outline-secondary">@context.User.Identity?.Name</button>
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden"></span>
+                    </button>
+                    <ul class="dropdown-menu ">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-key me-2"></i>Cambiar clave</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a href="logout" class="dropdown-item"><i class="bi bi-power me-2"></i>Cerrar sesión</a></li>
+                    </ul>
+                </div>
+            </div>            
+        </div>
+        
+    </Authorized>
+    <NotAuthorized>
+        <a href="login">Log In</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    [Parameter]
+    public string Email { get; set; } = string.Empty;
+
+
+}

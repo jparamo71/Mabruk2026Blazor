@@ -1,0 +1,165 @@
+﻿@page "/taking-inventory/{Id:int}"
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+@inject IJSRuntime js
+
+
+@if (info != null)
+{
+    <div class="row mb-3">
+        <div class="col-auto">
+            <a href="inventorylist">
+                <i class="bi bi-chevron-left h2 text-dark"></i>
+            </a>
+        </div>
+        <div class="col">
+            <h3>Toma física - @info!.Id</h3>
+        </div>
+        <div class="col-auto">
+            <a href="api/reports/takeinventory/@info.Id" class="me-2" target="_blank">
+                <i class="bi bi-file-earmark-pdf-fill h3 text-danger"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <label class="form-label fw-semibold">Id</label>
+                    <p>@info!.Id</p>
+                </div>
+                <div class="col">
+                    <label class="form-label fw-semibold">Fecha</label>
+                    <p>@info.DateStart?.ToString("dd/MM/yyyy")</p>
+                </div>
+                <div class="col">
+                    <label class="form-label fw-semibold">Marca</label>
+                    <p>@info.MarkName</p>
+                </div>
+                <div class="col">
+                    <label class="form-label fw-semibold">Estado</label>
+                    <p>@info.Status</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (info.Status == "REG")
+    {
+        <TakingProductData MarkId="@info.MarkId"
+        Justified="true"
+        SaveData="SaveProduct" />
+    }
+
+    @if (info.Details != null && info.Details.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr class="table-secondary">
+                        <th></th>
+                        <th>Código</th>
+                        <th>Producto</th>
+                        <th class="text-end">Sistema</th>
+                        <th class="text-end">Toma física</th>
+                        <th class="text-end">Diferencia</th>
+                        <th class="text-center">Ajustado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in info.Details)
+                    {
+                        <tr>
+                            <th>
+                                <a href="" @onclick:preventDefault @onclick:stopPropagation @onclick="@(() => SaveProduct(item))">
+                                    Grabar
+                                </a>
+                            </th>
+                            <td class="fit">@item.BarcharCode</td>
+                            <td class="text-truncate">@item.ProductName</td>
+                            <td class="text-end">@item.SystemAvailable.ToString("N2")</td>
+                            <td class="text-end">@item.PhysicalQuantity.ToString("N2")</td>
+                            <td class="text-end">@item.Difference.ToString("N2")</td>
+                            <td class="text-center">
+                                @if (item.Justified)
+                                {
+                                    <i class="bi bi-check-square"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-square"></i>
+                                }
+                            </td>
+                            <td>
+                                <a tabindex="0" class="btn btn-outline-secondary" role="button" data-bs-toggle="popover"
+                                data-bs-trigger="focus" data-bs-title="Observaciones"
+                                data-bs-content="@item.Notes">
+                                    <i class="bi bi-chat-left-dots"></i>
+                                </a>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private InventoryTakingDto? info;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await js.InvokeVoidAsync("configPopover");
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadInfo();
+    }
+
+
+    async Task LoadInfo()
+    {
+        var http = await repository.Get<InventoryTakingDto>($"api/inventory/{Id}");
+        if (http.Error)
+        {
+            await swal.FireAsync("Error", await http.GetErrorMessage(), SweetAlertIcon.Error);
+        }
+        else
+        {
+            info = http.Response!;
+            Console.WriteLine(info.Status);
+        }
+    }
+
+
+
+    async Task SaveProduct(ProductPhysicalDto product)
+    {
+        product.InventoryTakingId = info.Id;
+        product.PhysicalQuantity = product.PhysicalQuantity;
+        product.Difference = product.Difference;
+        var htts = await repository.Post<object>($"api/inventory/updateproduct", product);
+        if (htts.Error)
+        {
+            await swal.FireAsync("Error", await htts.GetErrorMessage(), SweetAlertIcon.Error);
+        }
+        else
+        {
+            await swal.FireAsync("Info", "Registro grabado exitósamente", SweetAlertIcon.Info);
+            navigationManager.NavigateTo($"taking-inventory/{info!.Id}", true);
+        }
+    }
+
+}

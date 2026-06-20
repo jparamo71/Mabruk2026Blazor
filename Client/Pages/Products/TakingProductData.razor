@@ -1,0 +1,197 @@
+﻿@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+<div class="card mb-3">
+    <div class="card-body">
+        <EditForm id="@frmProductData" Model="product" OnValidSubmit="ApplyingChanges">
+            <DataAnnotationsValidator />
+            <div class="row">
+                <div class="col-auto">
+                    <label class="col-form-label fw-semibold">Código</label>
+                </div>
+                <div class="col">
+                    <input type="text" @bind-value="textToSearch" class="form-control" @bind-value:event="oninput"
+                    @onkeypress="@((KeyboardEventArgs e) => OnKeyPressed(e))" autocomplete="off" />
+                </div>
+            </div>
+            @if (productInfo != null)
+            {
+                <hr />
+                <div class="row mt-3">
+                    <div class="col">
+                        <label class="form-label mb-0 fw-semibold small">Nombre del producto</label>
+                        <p>@product.ProductName</p>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center mb-3">
+                    <div class="col-auto text-center ">
+                        <label class="fw-semibold">Existencia</label>
+                        <div class="card" style="height:100px; width:150px;">
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <h1>@product.SystemAvailable.ToString("N2")</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-1"></div>
+                    <div class="col-auto text-center">
+                        <label class="fw-semibold">En bodega</label>
+                        <div class="card" style="height:100px; width:150px;">
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <InputNumber class="h1 border-0 text-center" style="width: 130px !important;"
+                                Value="product.PhysicalQuantity"
+                                ValueChanged="QuantityChanged" TValue="decimal"
+                                ValueExpression="() => product.PhysicalQuantity" />
+                                <ValidationMessage For="@(() => product.PhysicalQuantity)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-1"></div>
+                    <div class="col-auto text-center">
+                        <label class="fw-semibold">Diferencia</label>
+                        <div class="card" style="height:100px; width:150px;">
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <h1>@product.Difference.ToString("N2")</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if (MarkId > 0)
+                {
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label fw-semibold">Justificación de diferencia</label>
+                            <InputTextArea @bind-Value="product.Notes" class="form-control" />
+                            <ValidationMessage For="@(()  => product.Notes)" />
+                        </div>
+                    </div>
+                }
+            }
+        </EditForm>
+        @if (productInfo != null)
+        {
+            <div class="row">
+                <div class="col">
+                    <button type="submit" form="@frmProductData" class="btn btn-dark">
+                        Aplicar cambios
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int? MarkId { get; set; }
+
+
+    [Parameter]
+    public int? DocumentId { get; set; }
+
+
+    [Parameter]
+    public bool Justified { get; set; } = false;
+
+
+    [Parameter]
+    public EventCallback<ProductPhysicalDto> SaveData { get; set; }
+
+
+    private string? textToSearch;
+    private ProductPhysicalDto product = new ProductPhysicalDto();
+    private ProductDto? productInfo;
+    private string frmProductData = "frmProductData";
+
+
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (product != null)
+        {
+            product.Justified = Justified;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+
+    }
+
+
+
+    async Task OnKeyPressed(KeyboardEventArgs eventArgs)
+    {
+        if (eventArgs.Key == "Enter")
+        {
+            await GetProduct();
+        }
+    }
+
+
+    async Task GetProduct()
+    {
+        product = new ProductPhysicalDto();
+        
+        string url = "";
+        if (MarkId > 0)
+        {
+            url = $"api/product/filterbymark/{textToSearch}/{MarkId}";
+        }
+        else
+        {
+            url = $"api/product/filterbydocument/{textToSearch}/{DocumentId}";
+        }
+
+
+        var http = await repository.Get<ProductDto>(url);
+        if (!http.Error)
+        {
+            productInfo = http.Response!;
+            product.ProductId = productInfo.Id;
+            product.ProductName = productInfo.Name;
+            product.SystemAvailable = productInfo.Available;
+            product.PhysicalQuantity = 0;
+            product.Difference = productInfo.Available;
+        }
+        else
+        {
+            if (http.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                await swal.FireAsync("Error", "Producto no encontrado o no corresponde con la marca de la toma física", SweetAlertIcon.Error);
+            }
+            else
+            {
+                await swal.FireAsync("Error", await http.GetErrorMessage(), SweetAlertIcon.Error);
+            }
+        }
+    }
+
+
+    void QuantityChanged(decimal value)
+    {
+        if (product.PhysicalQuantity != value)
+        {
+            product.PhysicalQuantity = value;
+            product.Difference = value - product.SystemAvailable;
+            return;
+        }
+    }
+
+
+    async Task ApplyingChanges()
+    {
+        await SaveData.InvokeAsync(product);
+    }
+
+
+    void KeyHandler(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            return;
+        }
+    }
+}

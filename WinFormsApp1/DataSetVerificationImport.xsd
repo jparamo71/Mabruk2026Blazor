@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DataSetVerificationImport" targetNamespace="http://tempuri.org/DataSetVerificationImport.xsd" xmlns:mstns="http://tempuri.org/DataSetVerificationImport.xsd" xmlns="http://tempuri.org/DataSetVerificationImport.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="DataSetVerificationImport" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="DataSetVerificationImport" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="DataSetVerificationImport">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="dtVerificationImport" msprop:Generator_RowClassName="dtVerificationImportRow" msprop:Generator_RowEvHandlerName="dtVerificationImportRowChangeEventHandler" msprop:Generator_RowDeletedName="dtVerificationImportRowDeleted" msprop:Generator_RowDeletingName="dtVerificationImportRowDeleting" msprop:Generator_RowEvArgName="dtVerificationImportRowChangeEvent" msprop:Generator_TablePropName="dtVerificationImport" msprop:Generator_RowChangedName="dtVerificationImportRowChanged" msprop:Generator_UserTableName="dtVerificationImport" msprop:Generator_RowChangingName="dtVerificationImportRowChanging" msprop:Generator_TableClassName="dtVerificationImportDataTable" msprop:Generator_TableVarName="tabledtVerificationImport">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="DocumentTypeId" msprop:Generator_UserColumnName="DocumentTypeId" msprop:Generator_ColumnPropNameInTable="DocumentTypeIdColumn" msprop:Generator_ColumnPropNameInRow="DocumentTypeId" msprop:Generator_ColumnVarNameInTable="columnDocumentTypeId" type="xs:string" minOccurs="0" />
+              <xs:element name="DocumentNumber" msprop:Generator_UserColumnName="DocumentNumber" msprop:Generator_ColumnPropNameInTable="DocumentNumberColumn" msprop:Generator_ColumnPropNameInRow="DocumentNumber" msprop:Generator_ColumnVarNameInTable="columnDocumentNumber" type="xs:string" minOccurs="0" />
+              <xs:element name="DateStart" msprop:Generator_UserColumnName="DateStart" msprop:Generator_ColumnPropNameInTable="DateStartColumn" msprop:Generator_ColumnPropNameInRow="DateStart" msprop:Generator_ColumnVarNameInTable="columnDateStart" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Status" msprop:Generator_UserColumnName="Status" msprop:Generator_ColumnPropNameInTable="StatusColumn" msprop:Generator_ColumnPropNameInRow="Status" msprop:Generator_ColumnVarNameInTable="columnStatus" type="xs:string" minOccurs="0" />
+              <xs:element name="MarkName" msprop:Generator_UserColumnName="MarkName" msprop:Generator_ColumnPropNameInTable="MarkNameColumn" msprop:Generator_ColumnPropNameInRow="MarkName" msprop:Generator_ColumnVarNameInTable="columnMarkName" type="xs:string" minOccurs="0" />
+              <xs:element name="BarcharCode" msprop:Generator_UserColumnName="BarcharCode" msprop:Generator_ColumnPropNameInTable="BarcharCodeColumn" msprop:Generator_ColumnPropNameInRow="BarcharCode" msprop:Generator_ColumnVarNameInTable="columnBarcharCode" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductName" msprop:Generator_UserColumnName="ProductName" msprop:Generator_ColumnPropNameInTable="ProductNameColumn" msprop:Generator_ColumnPropNameInRow="ProductName" msprop:Generator_ColumnVarNameInTable="columnProductName" type="xs:string" minOccurs="0" />
+              <xs:element name="SystemAvailable" msprop:Generator_UserColumnName="SystemAvailable" msprop:Generator_ColumnPropNameInTable="SystemAvailableColumn" msprop:Generator_ColumnPropNameInRow="SystemAvailable" msprop:Generator_ColumnVarNameInTable="columnSystemAvailable" type="xs:decimal" minOccurs="0" />
+              <xs:element name="PhysicalQuantity" msprop:Generator_UserColumnName="PhysicalQuantity" msprop:Generator_ColumnPropNameInTable="PhysicalQuantityColumn" msprop:Generator_ColumnPropNameInRow="PhysicalQuantity" msprop:Generator_ColumnVarNameInTable="columnPhysicalQuantity" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Difference" msprop:Generator_UserColumnName="Difference" msprop:Generator_ColumnPropNameInTable="DifferenceColumn" msprop:Generator_ColumnPropNameInRow="Difference" msprop:Generator_ColumnVarNameInTable="columnDifference" type="xs:decimal" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

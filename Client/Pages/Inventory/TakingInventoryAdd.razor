@@ -1,0 +1,76 @@
+﻿@page "/taking-inventory-add"
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+<h3>Iniciando toma física de inventario</h3>
+
+<EditForm Model="takingInv" OnValidSubmit="Saving">
+    <div class="row mb-3">
+        <div class="col">
+            <label class="form-label fw-semibold">Seleccione la marca</label>
+            <InputSelect class="form-select" @bind-Value="@takingInv.MarkId">
+                @if (takingInv.MarkId == 0)
+                {
+                    <option value="0">SELECCIONE</option>
+                }
+                @if (marks != null)
+                {
+                    foreach (var st in marks)
+                    {
+                        if (st.Id == takingInv.MarkId)
+                        {
+                            <option value="@st.Id" selected>@st.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@st.Id">@st.Name</option>
+                        }
+                    }
+                }
+            </InputSelect>
+        </div>
+    </div>
+    <div class="mb-3">
+        <button type="submit" class="btn btn-outline-secondary">
+            Iniciar toma física
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    private List<MarkDto>? marks;
+    private InventoryTakingDto takingInv = new InventoryTakingDto();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMarks();
+    }
+
+
+    async Task LoadMarks()
+    {
+        var http = await repository.Get<List<MarkDto>>($"api/mark");
+        if (!http.Error)
+        {
+            marks = http.Response!;
+        }
+    }
+
+
+    async Task Saving()
+    {
+        var htts = await repository.Put<object>($"api/inventory/startaking", takingInv);
+        if (htts.Error)
+        {
+            await swal.FireAsync("Error", await htts.GetErrorMessage(), SweetAlertIcon.Error);
+        }
+        else
+        {
+            navigationManager.NavigateTo("inventorylist");
+        }
+    }
+
+}

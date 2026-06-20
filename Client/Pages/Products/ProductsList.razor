@@ -1,0 +1,138 @@
+﻿@page "/products"
+
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+
+@inject DialogService dialogService
+
+
+<div class="row mb-3">
+    <div class="col">
+        <h3>Productos activos</h3>
+    </div>
+    <div class="col-auto">
+        <a href="api/reports/products" class="me-2" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill h3 text-danger"></i>
+        </a>
+        <a href="" @onclick:preventDefault @onclick:stopPropagation
+           @onclick="OpenSideDialog">
+            <i class="bi bi-search h3 text-warning"></i>
+        </a>
+    </div>
+</div>
+
+<RadzenDataGrid @ref=grid Data="@products" Count="@count" LoadData="@LoadData" AllowVirtualization="true" Style="height:550px"
+                AllowFiltering="false" FilterPopupRenderMode="PopupRenderMode.OnDemand" 
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
+                AllowSorting="false">
+    <Columns>
+        <RadzenDataGridColumn Context="item" Width="40px" Filterable="false" TextAlign="TextAlign.Center">
+            <Template Context="item">
+                <a href="/document-readonly/@item.ProductId">
+                    <i class="bi bi-eye-fill"></i>
+                </a>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="BarcharCode" Title="Código" Filterable="false" Width="150px" />
+        <RadzenDataGridColumn Property="UPCCode" Title="UPC" Width="150px" Filterable="false" />
+        <RadzenDataGridColumn Property="Name" Title="Producto" Filterable="false" />
+        <RadzenDataGridColumn Property="MarkName" Title="Asegurado" Filterable="false" />
+        <RadzenDataGridColumn Property="Available" Title="Disponible" Filterable="false" Width="110px" FormatString={0:N2} TextAlign="TextAlign.Right" />
+    </Columns>
+</RadzenDataGrid>
+
+
+
+
+@code {
+
+    IEnumerable<ProductItemList>? products;
+    RadzenDataGrid<ProductItemList> grid;
+    int count;
+    List<MarkDto> marks = new List<MarkDto>();
+    ProductsFilterDto filters = new ProductsFilterDto();
+
+
+    protected override void OnInitialized()
+    {
+        _= LoadCatalogs();
+
+        //await LoadCatalogs().ConfigureAwait(false);
+    }
+
+
+    async Task LoadCatalogs()
+    {
+        var httm = await repository.Get<List<MarkDto>>($"api/mark");
+        if (!httm.Error)
+        {
+            marks = httm.Response!;
+        }
+    }
+
+
+    async Task LoadData(LoadDataArgs args)
+    {
+        var url = $"api/product/tolist?skip={args.Skip}&take=30";
+
+        if (filters != null)
+        {
+            if (!string.IsNullOrEmpty(filters.TextToSearch))
+            {
+                url += $"&filter={filters.TextToSearch}";
+            }
+
+            if (filters.SelectedMarkId > 0)
+            {
+                url += $"&markid={filters.SelectedMarkId}";
+            }
+        }
+
+        var http = await repository.Get<IEnumerable<ProductItemList>>(url);
+        if (!http.Error)
+        {
+            count = int.Parse(http.HttpResponseMessage.Headers.GetValues("totalRows").FirstOrDefault()!);
+            products = http.Response!;
+            StateHasChanged();
+        }
+    }
+
+
+    async Task ApplyFilters()
+    {
+        await LoadData(new LoadDataArgs()
+            {
+                Skip = 0
+            });
+        await grid.Reload();
+    }
+
+
+    async Task OpenSideDialog()
+    {        
+        var result = await dialogService.OpenSideAsync<FilterList>(
+            "Búsqueda avanzada",
+            new Dictionary<string, object>() { 
+                { "Marks", marks },
+                { "Filters", filters}
+            },
+            options: new SideDialogOptions
+                {
+                    CloseDialogOnOverlayClick = true,
+                    ShowMask = true
+            }
+        );
+
+        var typeOfResult = result.GetType();
+        if (result != null && typeOfResult == typeof(ProductsFilterDto))
+        {
+            filters = result!;
+            await ApplyFilters();
+        }
+        
+    }
+
+}

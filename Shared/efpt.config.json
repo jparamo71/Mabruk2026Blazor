@@ -1,0 +1,189 @@
+﻿{
+   "CodeGenerationMode": 4,
+   "ContextClassName": "MabrukInventarioContext",
+   "ContextNamespace": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "IrregularWords": null,
+   "MinimumProductVersion": "2.6.1301",
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "ModelsInventario",
+   "PluralRules": null,
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "Blazor.Shared",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 2,
+   "SelectedToBeGenerated": 0,
+   "SingularRules": null,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "[dbo].[detalle_pedido]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[detallehistorialtomafisica]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[estado_pedido]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[historialtomafisica]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[notificacion]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[notificacionusuario]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[pedido]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[tomafisica]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[usuariopermiso]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[sp_actualizar_cliente]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_actualizar_detalle_pedido]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_buscar_cliente]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_buscar_producto_cliente]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_buscar_producto]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_cambiar_es_cotizacion]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_comparar_pedido]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_confirmar_pedido]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_eliminar_detalle_pedido]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_eliminar_pedido]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_enviar_correo]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_establecer_eliminada]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_Establecer_Leida]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_get_error_info]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_iniciar_pedido]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_Iniciar_TomaFisica]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_Listado_Notificaciones_Usuario]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_listado_pedidos]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_notificar]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_obtener_cliente]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_obtener_detalle_pedido]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_obtener_error]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_obtener_notificacion]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_Obtener_Notificaciones_Pendientes]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_obtener_pedido]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[sp_obtener_producto]",
+         "ObjectType": 1
+      }
+   ],
+   "UiHint": null,
+   "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDatabaseNamesForRoutines": true,
+   "UseDateOnlyTimeOnly": false,
+   "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": false,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
+   "UseSchemaFolders": false,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false,
+   "UseT4Split": false
+}

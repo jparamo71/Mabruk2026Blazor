@@ -1,0 +1,182 @@
+﻿@page "/import-readonly/{Id:int}"
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+@inject IJSRuntime js
+
+
+@if (info != null)
+{
+    <div class="row mb-3">
+        <div class="col-auto">
+            <a href="imports">
+                <i class="bi bi-chevron-left h2 text-dark"></i>
+            </a>
+        </div>
+        <div class="col">
+            <h2>Documento</h2>
+        </div>
+        @if (info.Status == "NVR")
+        {
+            <div class="col-auto">
+                <button type="button" class="btn btn-dark" @onclick="Start">Iniciar verificación</button>
+            </div>
+        }
+        @if (info.Status == "EVR")
+        {
+            <div class="col-auto">
+                <button type="button" class="btn btn-dark" @onclick="Finish">Finalizar verificación</button>
+            </div>
+        }
+        @if (info.Status == "VRF")
+        {
+            <div class="col-auto">
+                <a href="api/reports/verificationimport/@info.Id" class="me-2" target="_blank">
+                    <i class="bi bi-file-earmark-pdf-fill h3 text-danger"></i>
+                </a>
+            </div>
+        }
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <label class="form-label lbl fw-semibold small">Documento</label>
+                    <div>@info!.DocumentTypeId @info.DocumentNumber</div>
+                    <span class="text-danger">@info.Status</span>
+                </div>
+                <div class="col">
+                    <label class="form-label lbl fw-semibold small">Fecha</label>
+                    <div>@info.DocumentDate.ToString("dd/MM/yyyy")</div>
+                </div>
+                <div class="col">
+                    <label class="form-label lbl fw-semibold small">Proveedor</label>
+                    <div>@info.ProviderName</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (info.Status == "EVR")
+    {
+        <TakingProductData DocumentId="info.Id"
+                           Justified="false"
+                           SaveData="SaveProduct" />
+    }
+
+
+    @if (info.Details != null && info.Details.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr class="table-secondary">
+                        <th>Código</th>
+                        <th>Producto</th>
+                        <th class="text-end">Cantidad</th>
+                        <th class="text-end">Verificación</th>
+                        <th class="text-end">Diferencia</th>
+                        <th class="text-end">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in info.Details)
+                    {
+                        <tr>
+                            <td>@item.BarcharCode</td>
+                            <td>@item.ProductName</td>
+                            <td class="text-end">@item.Quantity.ToString("N2")</td>
+                            <td class="text-end">@item.VerifiedQuantity.ToString("N2")</td>
+                            <td class="text-end">@((item.Quantity - item.VerifiedQuantity).ToString("N2"))</td>
+                            <td class="text-end">@item.TotalValue.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>        
+    }
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private ImportDto? info;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadInfo();
+    }
+
+
+    async Task LoadInfo()
+    {
+        var http = await repository.Get<ImportDto>($"api/imports/{Id}");
+        if (http.Error)
+        {
+            await swal.FireAsync("Error", await http.GetErrorMessage(), SweetAlertIcon.Error);
+        }
+        else
+        {
+            info = http.Response!;
+        }
+    }
+
+
+
+    async Task Start()
+    {
+        if (info != null)
+        {
+            var http = await repository.Put<object>($"api/imports/startverification/{info.Id}", null);
+            if (http.Error)
+            {
+                await swal.FireAsync("Error", await http.GetErrorMessage(), SweetAlertIcon.Error);
+            }
+            else
+            {
+                info.Status = "EVR";
+                StateHasChanged();
+            }
+        }
+    }
+
+
+    async Task Finish()
+    {
+        if (info != null)
+        {
+            var http = await repository.Put<object>($"api/imports/finishverification/{info.Id}", null);
+            if (http.Error)
+            {
+                await swal.FireAsync("Error", await http.GetErrorMessage(), SweetAlertIcon.Error);
+            }
+            else
+            {
+                info.Status = "VRF";
+                StateHasChanged();
+            }
+        }
+    }
+
+
+    async Task SaveProduct(ProductPhysicalDto product)
+    {
+        product.Id = info.Id;
+        var htts = await repository.Put<object>($"api/imports", product);
+        if (htts.Error)
+        {
+            await swal.FireAsync("Error", await htts.GetErrorMessage(), SweetAlertIcon.Error);
+        }
+        else
+        {
+            await swal.FireAsync("Info", "Registro actualizado correctamente", SweetAlertIcon.Info);
+            navigationManager.NavigateTo($"import-readonly/{info!.Id}", true);
+        }
+    }
+
+}

@@ -1,0 +1,106 @@
+﻿@page "/update-code-boxes"
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@attribute [Authorize]
+@inject IJSRuntime js
+@inject NavigationManager navigationManager
+
+<div class="container">
+    <div class="row mb-3">
+        <div class="col">
+            <h3>Ingrese código de producto</h3>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <div class="input-group">
+                <input type="text" @bind-value="textToSearch" class="form-control" @bind-value:event="oninput"
+                       @onkeypress="@((KeyboardEventArgs e) => OnKeyPressed(e))" autocomplete="off" />
+                <button type="button" class="btn btn-primary" @onclick="@(() => GetProduct())">Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (product != null)
+{
+    <EditForm Model="updateUPC" OnValidSubmit="UpdateUPCCode">
+        <DataAnnotationsValidator />
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col">
+                        <p class="fw-semibold mb-0">@product.BarcharCode</p>
+                        <p>@product.Name</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label fw-semibold">Unidades por paquete</label>
+                        <InputNumber class="form-control" @bind-Value="updateUPC.UnitsByPackage" />
+                        <ValidationMessage For="@(() => updateUPC.UnitsByPackage)" />
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-semibold">Código de paquete</label>
+                        <InputText class="form-control" @bind-Value="updateUPC.UPCCode" />
+                        <ValidationMessage For="@(() => updateUPC.UPCCode)" />
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary">Grabar cambios</button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+
+    private string? textToSearch;
+    private ProductDto? product;
+    private UpdateUPCCodeDto updateUPC = new UpdateUPCCodeDto();
+
+
+    async Task OnKeyPressed(KeyboardEventArgs eventArgs)
+    {
+        Console.WriteLine(eventArgs.Key);
+        if (eventArgs.Key == "Enter")
+        {
+            await GetProduct();
+        }
+    }
+
+
+    async Task GetProduct()
+    {
+        product = null;
+        var http = await repository.Get<ProductDto>($"api/product/single/{textToSearch}");
+        if (!http.Error)
+        {
+            product = http.Response!;
+            updateUPC.BarCharCode = product.BarcharCode!;
+            updateUPC.UnitsByPackage = product.UnitsByPackage;
+            updateUPC.UPCCode = product.UPCCode??"";
+        }
+    }
+
+
+    async Task UpdateUPCCode()
+    {
+        var http = await repository.Post<object>($"api/product/updateupc", updateUPC);
+        if (http.Error)
+        {
+            await swal.FireAsync("Error", await http.GetErrorMessage(), SweetAlertIcon.Error);
+        }
+        else
+        {
+            await swal.FireAsync("Info", "Se actualizó el código UPC.", SweetAlertIcon.Info);
+            product = null;
+            updateUPC = new UpdateUPCCodeDto();
+            textToSearch = string.Empty;
+        }
+    }
+}

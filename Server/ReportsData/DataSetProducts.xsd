@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DataSetProducts" targetNamespace="http://tempuri.org/DataSetProducts.xsd" xmlns:mstns="http://tempuri.org/DataSetProducts.xsd" xmlns="http://tempuri.org/DataSetProducts.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="DataSetProducts" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="DataSetProducts" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="DataSetProducts">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="dtProductList" msprop:Generator_RowClassName="dtProductListRow" msprop:Generator_RowEvHandlerName="dtProductListRowChangeEventHandler" msprop:Generator_RowDeletedName="dtProductListRowDeleted" msprop:Generator_RowDeletingName="dtProductListRowDeleting" msprop:Generator_RowEvArgName="dtProductListRowChangeEvent" msprop:Generator_TablePropName="dtProductList" msprop:Generator_RowChangedName="dtProductListRowChanged" msprop:Generator_UserTableName="dtProductList" msprop:Generator_RowChangingName="dtProductListRowChanging" msprop:Generator_TableClassName="dtProductListDataTable" msprop:Generator_TableVarName="tabledtProductList">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="BarcharCode" msprop:Generator_UserColumnName="BarcharCode" msprop:Generator_ColumnPropNameInTable="BarcharCodeColumn" msprop:Generator_ColumnPropNameInRow="BarcharCode" msprop:Generator_ColumnVarNameInTable="columnBarcharCode" type="xs:string" minOccurs="0" />
+              <xs:element name="UPCCode" msprop:Generator_UserColumnName="UPCCode" msprop:Generator_ColumnPropNameInTable="UPCCodeColumn" msprop:Generator_ColumnPropNameInRow="UPCCode" msprop:Generator_ColumnVarNameInTable="columnUPCCode" type="xs:string" minOccurs="0" />
+              <xs:element name="MarkName" msprop:Generator_UserColumnName="MarkName" msprop:Generator_ColumnPropNameInTable="MarkNameColumn" msprop:Generator_ColumnPropNameInRow="MarkName" msprop:Generator_ColumnVarNameInTable="columnMarkName" type="xs:string" minOccurs="0" />
+              <xs:element name="Available" msprop:Generator_UserColumnName="Available" msprop:Generator_ColumnPropNameInTable="AvailableColumn" msprop:Generator_ColumnPropNameInRow="Available" msprop:Generator_ColumnVarNameInTable="columnAvailable" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Name" msprop:Generator_UserColumnName="Name" msprop:Generator_ColumnPropNameInTable="NameColumn" msprop:Generator_ColumnPropNameInRow="Name" msprop:Generator_ColumnVarNameInTable="columnName" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductId" msprop:Generator_ColumnPropNameInRow="ProductId" msprop:Generator_ColumnPropNameInTable="ProductIdColumn" msprop:Generator_ColumnVarNameInTable="columnProductId" msprop:Generator_UserColumnName="ProductId" type="xs:int" minOccurs="0" />
+              <xs:element name="MarkId" msprop:Generator_ColumnPropNameInRow="MarkId" msprop:Generator_ColumnPropNameInTable="MarkIdColumn" msprop:Generator_ColumnVarNameInTable="columnMarkId" msprop:Generator_UserColumnName="MarkId" type="xs:short" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

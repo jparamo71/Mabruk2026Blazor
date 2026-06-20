@@ -1,0 +1,106 @@
+﻿@page "/inventorylist"
+
+
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+@inject IJSRuntime js
+@attribute [Authorize]
+
+
+<div class="row mb-3">
+    <div class="col">
+        <h3>Toma física de inventario</h3>
+    </div>
+    <div class="col-auto">
+        <a href="taking-inventory-add" class="btn btn-dark">Iniciar nueva toma física</a>
+    </div>
+</div>
+
+<RadzenDataGrid @ref=grid Data="@inventories" Count="@count" LoadData="@LoadData" AllowVirtualization="true" Style="height:550px"
+                AllowFiltering="false" FilterPopupRenderMode="PopupRenderMode.OnDemand"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
+                AllowSorting="false">
+    <Columns>
+        <RadzenDataGridColumn Context="item" Width="40px" Filterable="false" TextAlign="TextAlign.Center">
+            <Template Context="item">
+                <a href="/taking-inventory/@item.Id">
+                    <i class="bi bi-eye-fill"></i>
+                </a>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="DateStart" Title="Fecha" Filterable="false" Width="100px" FormatString="{0:MM/dd/yyy}" />
+        <RadzenDataGridColumn Property="MarkName" Title="Marca" Filterable="false" />
+        <RadzenDataGridColumn Property="Status" Title="Estado" Filterable="false" Width="100px" />
+        <RadzenDataGridColumn Context="item" Width="40px" Filterable="false" TextAlign="TextAlign.Center">
+            <Template Context="item">
+                @if (item.Status.Equals("REG"))
+                {
+                    <a href="" @onclick:preventDefault @onclick:stopPropagation
+                       @onclick="@(() => DeleteIT(item.Id))" class="text-danger">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                }
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    RadzenDataGrid<InventoryTakingDto> grid;
+    int count;
+    IEnumerable<InventoryTakingDto>? inventories;
+    string? textToSearch;
+
+
+
+    async Task LoadData(LoadDataArgs args)
+    {
+        var url = $"api/inventory/paged?skip={args.Skip}&take=30";
+
+        if (!string.IsNullOrEmpty(textToSearch))
+        {
+            url += $"&filter={textToSearch}";
+        }
+
+        var http = await repository.Get<IEnumerable<InventoryTakingDto>>(url);
+        if (!http.Error)
+        {
+            count = int.Parse(http.HttpResponseMessage.Headers.GetValues("totalRows").FirstOrDefault()!);
+            inventories = http.Response!;
+        }
+    }
+
+
+    async Task DeleteIT(int id)
+    {
+        SweetAlertResult result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Eliminación",
+                Text = "¿Está seguro que desea eliminar la toma física?",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Sí",
+                CancelButtonText = "No"
+            });
+
+        if (!string.IsNullOrEmpty(result.Value))
+        {
+            var httd = await repository.Delete($"api/inventory/{id}");
+            if (httd.Error)
+            {
+                await swal.FireAsync("Error", await httd.GetErrorMessage(), SweetAlertIcon.Error);
+            }
+            else
+            {
+                navigationManager.NavigateTo("inventorylist", true);
+            }
+        }
+
+    }
+
+
+
+
+}

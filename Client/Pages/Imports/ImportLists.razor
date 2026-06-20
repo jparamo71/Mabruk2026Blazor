@@ -1,0 +1,59 @@
+﻿@page "/imports"
+
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+@attribute [Authorize]
+
+
+<div class="row mb-3">
+    <div class="col">
+        <h3>Documentos de importación</h3>
+    </div>
+    <div class="col-auto">       
+    </div>
+</div>
+
+
+<RadzenDataGrid @ref=grid Data="@documents" Count="@count" LoadData="@LoadData" AllowVirtualization="true" Style="height:550px"
+                AllowFiltering="false" FilterPopupRenderMode="PopupRenderMode.OnDemand"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" LogicalFilterOperator="LogicalFilterOperator.Or"
+                AllowSorting="false">
+    <Columns>
+        <RadzenDataGridColumn Context="item" Width="40px" Filterable="false" TextAlign="TextAlign.Center">
+            <Template Context="item">
+                <a href="/import-readonly/@item.Id">
+                    <i class="bi bi-eye-fill"></i>
+                </a>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="DocumentTypeId" Title="Tipo" Filterable="false" Width="50px" />
+        <RadzenDataGridColumn Property="DocumentNumber" Title="Número" Width="150px" Filterable="false" />
+        <RadzenDataGridColumn Property="DocumentDate" Title="Fecha" Filterable="false" FormatString="{0:MM/dd/yyy}" />
+        <RadzenDataGridColumn Property="ProviderName" Title="Proveedor" Filterable="false" />
+        <RadzenDataGridColumn Property="TotalValue" Title="Total" Filterable="false" Width="110px" FormatString={0:N2} TextAlign="TextAlign.Right" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    IEnumerable<ImportDocument>? documents;
+    RadzenDataGrid<ImportDocument> grid;
+    int count;
+
+    async Task LoadData(LoadDataArgs args)
+    {
+        var url = $"api/imports/paged?skip={args.Skip}&take=30";
+        var httdc = await repository.Get<IEnumerable<ImportDocument>>(url);
+        if (!httdc.Error)
+        {
+            count = int.Parse(httdc.HttpResponseMessage.Headers.GetValues("totalRows").FirstOrDefault()!);
+            documents = httdc.Response!;
+            StateHasChanged();
+        }
+
+
+    }
+
+
+}

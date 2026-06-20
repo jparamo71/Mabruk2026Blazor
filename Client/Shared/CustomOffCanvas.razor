@@ -1,0 +1,46 @@
+﻿<div class="offcanvas offcanvas-end @(isHidden ? "": "show")" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasRightLabel">@Title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" @onclick="Hide"></button>
+    </div>
+    <div class="offcanvas-body">
+        @if (Content != null)
+        {
+            @Content
+        }
+    </div>    
+</div>
+
+@if (!isHidden)
+{
+    <div class="offcanvas-backdrop fade show"></div>
+}
+
+
+@code {
+
+    [Parameter]
+    public RenderFragment? Content { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "";
+
+
+    private bool isHidden { get; set; } = true;
+
+
+    public void Show()
+    {
+        isHidden = false;
+    }
+
+
+    public void Hide()
+    {
+        isHidden = true;
+    }
+
+
+
+
+}
